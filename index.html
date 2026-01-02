@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>توصيلاتي</title>
+<title>🚗 توصيلاتي</title>
 
 <!-- Leaflet CSS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
@@ -11,9 +11,12 @@
 <style>
 body {
     margin: 0;
-    font-family: Arial, sans-serif;
-    background: #f2f2f2;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: linear-gradient(135deg, #e0eafc, #cfdef3);
     direction: rtl;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 header {
@@ -21,49 +24,64 @@ header {
     color: white;
     text-align: center;
     padding: 15px;
-    font-size: 22px;
+    font-size: 24px;
+    font-weight: bold;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
 
 .container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
     padding: 15px;
+    gap: 15px;
 }
 
 .card {
-    background: white;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 10px;
+    background: rgba(255,255,255,0.8);
+    backdrop-filter: blur(10px);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: all 0.4s ease;
+    opacity: 0;
+    transform: translateY(20px);
+}
+.card.show {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 button {
     width: 100%;
-    padding: 10px;
-    margin-top: 5px;
+    padding: 12px;
+    margin-top: 8px;
     background: #0d6efd;
     color: white;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 16px;
     cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
 }
-
 button:hover {
     background: #084298;
+    transform: scale(1.03);
 }
 
 input {
     width: 100%;
-    padding: 10px;
-    margin-top: 5px;
-    border-radius: 5px;
+    padding: 12px;
+    margin-top: 8px;
+    border-radius: 8px;
     border: 1px solid #ccc;
     font-size: 16px;
 }
 
 #map {
-    height: 400px;
-    border-radius: 8px;
-    margin-top: 10px;
+    flex: 1;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 .hidden {
@@ -79,7 +97,7 @@ input {
 <div class="container">
 
     <!-- LOGIN -->
-    <div id="login" class="card">
+    <div id="login" class="card show">
         <h3>تسجيل الدخول</h3>
         <button onclick="login('driver')">دخول كسائق</button>
         <button onclick="login('customer')">دخول كزبون</button>
@@ -120,17 +138,26 @@ function initMap() {
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap'
     }).addTo(map);
-}
 
+    window.addEventListener("resize", () => {
+        map.invalidateSize();
+    });
+}
 initMap();
+
+function showCard(id) {
+    document.querySelectorAll(".card").forEach(c => c.classList.add("hidden"));
+    const card = document.getElementById(id);
+    card.classList.remove("hidden");
+    setTimeout(() => card.classList.add("show"), 50);
+}
 
 function login(role) {
     document.getElementById("login").classList.add("hidden");
-
     if (role === "driver") {
-        document.getElementById("driverPanel").classList.remove("hidden");
+        showCard("driverPanel");
     } else {
-        document.getElementById("customerPanel").classList.remove("hidden");
+        showCard("customerPanel");
     }
 }
 
@@ -170,7 +197,6 @@ function publishRide() {
         return;
     }
 
-    // Free geocoding using Nominatim
     fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${destinationText}`)
         .then(res => res.json())
         .then(data => {
